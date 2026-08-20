@@ -248,11 +248,14 @@
 
   label.ncf-filebox {
     position: relative;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
     height: 96px; border: 1px dashed var(--border); border-radius: 4px;
     background: #fff; cursor: pointer; text-align: center;
+    transition: border-color 0.15s, background 0.15s;
   }
-  .ncf-filebox span { font-size: 16px; font-weight: 400; line-height: 1.4; color: var(--sub); }
+  label.ncf-filebox:hover { border-color: var(--green); background: rgba(97,221,121,0.04); }
+  .ncf-filebox span { font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--sub); }
+  .ncf-filebox-icon { color: rgba(55,56,60,0.32); }
   .ncf-filebox input { display: none; }
   .ncf-filebox .badge {
     position: absolute; top: 10px; right: 10px;
@@ -260,21 +263,51 @@
   }
   .ncf-filebox .badge--required { background: rgba(97,221,121,0.08); color: var(--green); }
   .ncf-filebox .badge--optional { background: rgba(55,56,60,0.06); color: var(--sub); }
-  .ncf-filebox-reset {
-    position: absolute; bottom: 8px; right: 10px;
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 12px; font-weight: 600; color: var(--sub);
-    background: #fff; border: 1px solid var(--border); border-radius: 20px;
-    padding: 5px 12px; line-height: 1; cursor: pointer;
-    transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+  /* 첨부파일 카드 - "등록된 파일"과 "새로 추가한 파일" 모두 같은 모양으로 보여줌 */
+  .ncf-existing { margin-top: 16px; }
+  .ncf-existing + .ncf-existing { margin-top: 20px; }
+  .ncf-existing-title {
+    font-size: 13px; font-weight: 600; color: var(--sub); margin: 0 0 8px;
   }
-  .ncf-filebox-reset::before {
-    content: ''; display: inline-block; width: 10px; height: 10px;
-    background: currentColor;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6l12 12M18 6L6 18' stroke='black' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
-            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6l12 12M18 6L6 18' stroke='black' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  .ncf-existing-title .count { font-weight: 500; color: rgba(55,56,60,0.5); }
+  .ncf-existing-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px;
   }
-  .ncf-filebox-reset:hover { color: var(--ink); border-color: var(--ink); background: rgba(55,56,60,0.04); }
+  .ncf-existing-card {
+    position: relative; overflow: hidden;
+    border: 1px solid var(--border); border-radius: 4px; background: #fff;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .ncf-existing-card:hover { border-color: var(--green); transform: translateY(-2px); }
+  .ncf-existing-link { display: block; text-decoration: none; }
+  .ncf-existing-thumb {
+    position: relative; aspect-ratio: 3 / 4; overflow: hidden;
+    background: rgba(55,56,60,0.04);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ncf-existing-thumb img {
+    width: 100%; height: 100%; display: block;
+    object-fit: cover; object-position: top center;
+  }
+  .ncf-existing-thumb svg { color: rgba(55,56,60,0.28); }
+  .ncf-existing-name {
+    display: block; padding: 8px 10px;
+    font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* 썸네일 우측 상단 x 버튼 */
+  .ncf-existing-remove {
+    position: absolute; top: 6px; right: 6px; z-index: 2;
+    width: 24px; height: 24px; padding: 0; border-radius: 50%;
+    border: none; background: rgba(23,23,25,0.55); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .ncf-existing-remove:hover { background: var(--required); }
+  /* 새로 추가한 파일은 초록 테두리로 구분 */
+  .ncf-existing--new .ncf-existing-card { border-color: rgba(97,221,121,0.75); }
+  .ncf-existing--new .ncf-existing-title { color: var(--green); }
 
   /* 멘토링 안내 박스 */
   .ncf-notice {
@@ -585,8 +618,10 @@
       <label class="ncf-filebox">
         <input type="file" name="resume" accept="application/pdf">
         <span class="badge badge--required">필수</span>
-        <span>클릭하여 이력서 업로드</span>
+        <svg class="ncf-filebox-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>클릭하여 이력서 업로드</span>
       </label>
+      <div class="ncf-existing" id="existingResume" style="display:none;"></div>
+      <div class="ncf-existing ncf-existing--new" id="newResume" style="display:none;"></div>
     </div>
 
     <!-- 섹션 5. 포트폴리오 -->
@@ -596,8 +631,10 @@
       <label class="ncf-filebox">
         <input type="file" name="portfolio_file" multiple>
         <span class="badge badge--required">필수</span>
-        <span>클릭하여 포트폴리오 업로드</span>
+        <svg class="ncf-filebox-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>클릭하여 포트폴리오 업로드</span>
       </label>
+      <div class="ncf-existing" id="existingPortfolio" style="display:none;"></div>
+      <div class="ncf-existing ncf-existing--new" id="newPortfolio" style="display:none;"></div>
       <div class="ncf-field" style="margin-top:16px;">
         <label>포트폴리오 URL <span class="ncf-group-optional">(선택)</span></label>
         <input type="url" name="portfolio_url" placeholder="포트폴리오 링크를 입력해주세요">
@@ -668,8 +705,10 @@
         <label class="ncf-filebox">
           <input type="file" name="mentor_portfolio" multiple>
           <span class="badge badge--optional">선택</span>
-          <span>클릭하여 발표용 포트폴리오 업로드</span>
+          <svg class="ncf-filebox-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>클릭하여 발표용 포트폴리오 업로드</span>
         </label>
+        <div class="ncf-existing" id="existingMentorPortfolio" style="display:none;"></div>
+      <div class="ncf-existing ncf-existing--new" id="newMentorPortfolio" style="display:none;"></div>
       </div>
     </div>
     </div><!-- /step-panel--blue -->
@@ -818,8 +857,8 @@
       return '이력서 파일은 10MB 미만이어야 해요. (현재 ' + Math.round(resumeFile.size / MB) + 'MB)';
     }
 
-    if (portfolioFiles.length > 3) {
-      return '포트폴리오는 최대 3개까지만 업로드할 수 있어요.';
+    if (existingFiles.portfolio_file.length + portfolioFiles.length > 3) {
+      return '포트폴리오는 등록된 파일까지 합쳐 최대 3개까지예요. 등록된 파일을 x 로 지운 뒤 다시 시도해주세요.';
     }
     for (var i = 0; i < portfolioFiles.length; i++) {
       if (portfolioFiles[i].size > 100 * MB) {
@@ -827,8 +866,8 @@
       }
     }
 
-    if (mentorPortfolioFiles.length > 3) {
-      return '발표용 포트폴리오는 최대 3개까지만 업로드할 수 있어요.';
+    if (existingFiles.mentor_portfolio.length + mentorPortfolioFiles.length > 3) {
+      return '발표용 포트폴리오는 등록된 파일까지 합쳐 최대 3개까지예요. 등록된 파일을 x 로 지운 뒤 다시 시도해주세요.';
     }
     for (var j = 0; j < mentorPortfolioFiles.length; j++) {
       if (mentorPortfolioFiles[j].size > 100 * MB) {
@@ -838,6 +877,172 @@
 
     return null;
   }
+
+  // ============================================
+  // 2-2. 수정 모드에서 "이미 올려둔 파일" 보여주기
+  // Firebase Storage 주소에서 원래 파일 이름을 뽑아내고, 화면에 목록으로 그려줌
+  // ============================================
+
+  // 저장된 주소는 ".../o/resumes%2F1712345678901_홍길동_이력서.pdf?alt=media..." 같은 모양이라
+  // 폴더명과 앞에 붙은 시간표시(13자리 숫자)를 떼어내고 사람이 읽을 수 있는 이름만 남김
+  function getFileNameFromUrl(url) {
+    try {
+      var m = decodeURIComponent(url).match(/\/o\/([^?]+)/);
+      if (!m) return '첨부파일';
+      return m[1].split('/').pop().replace(/^\d{10,}_/, '') || '첨부파일';
+    } catch (err) {
+      return '첨부파일';
+    }
+  }
+
+  var FILE_ICON_SVG = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M14 3v5h5M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var X_ICON_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+
+  // 첨부파일 3종의 정보를 한 곳에 모아둠 (박스 id, 사람이 읽는 이름)
+  var EXISTING_GROUPS = {
+    resume:           { boxId: 'existingResume',          newBoxId: 'newResume',          label: '이력서' },
+    portfolio_file:   { boxId: 'existingPortfolio',       newBoxId: 'newPortfolio',       label: '포트폴리오' },
+    mentor_portfolio: { boxId: 'existingMentorPortfolio', newBoxId: 'newMentorPortfolio', label: '발표용 포트폴리오' }
+  };
+
+  // existingFiles: 이미 저장돼 있는 파일 중 화면에 남아있는 것 (x 누르면 빠짐 -> 저장 시 실제 삭제)
+  // existingOriginal: 처음 불러온 원본 (바뀐 게 있는지 비교용)
+  var existingFiles = { resume: [], portfolio_file: [], mentor_portfolio: [] };
+  var existingOriginal = { resume: [], portfolio_file: [], mentor_portfolio: [] };
+  var existingThumbs = { resume: '', portfolio_file: '', mentor_portfolio: '' };
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // 카드 한 묶음을 그리는 공통 함수 - "등록된 파일"과 "새로 추가한 파일"이 같은 모양을 쓰도록
+  function renderCardGrid(box, title, cards) {
+    if (!box) return;
+    if (!cards.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+    var html = '<p class="ncf-existing-title">' + title +
+               (cards.length > 1 ? ' <span class="count">' + cards.length + '개</span>' : '') +
+               '</p><div class="ncf-existing-grid">';
+    cards.forEach(function (c, i) {
+      var inner = '<span class="ncf-existing-thumb" data-thumb-slot="' + c.kind + '-' + c.group + '-' + i + '">' +
+                    (c.thumb || FILE_ICON_SVG) +
+                  '</span><span class="ncf-existing-name">' + escapeHtml(c.name) + '</span>';
+      html += '<div class="ncf-existing-card">' +
+                '<button type="button" class="ncf-existing-remove" data-kind="' + c.kind +
+                  '" data-group="' + c.group + '" data-index="' + i + '" aria-label="' + escapeHtml(c.name) + ' 삭제">' +
+                  X_ICON_SVG + '</button>' +
+                (c.href
+                  ? '<a class="ncf-existing-link" href="' + escapeHtml(c.href) + '" target="_blank" rel="noopener">' + inner + '</a>'
+                  : '<span class="ncf-existing-link">' + inner + '</span>') +
+              '</div>';
+    });
+    box.innerHTML = html + '</div>';
+    box.style.display = '';
+  }
+
+  // 이미 저장돼 있는 파일 카드
+  function renderExistingFiles(groupName) {
+    var group = EXISTING_GROUPS[groupName];
+    if (!group) return;
+    var list = existingFiles[groupName] || [];
+    // 원래 첫 번째 파일이 그대로 남아있을 때만 저장된 썸네일이 유효함
+    var thumbValid = existingThumbs[groupName] && list.length &&
+                     list[0].url === (existingOriginal[groupName][0] || {}).url;
+
+    renderCardGrid(document.getElementById(group.boxId), '등록된 ' + group.label,
+      list.map(function (item, i) {
+        return {
+          kind: 'old', group: groupName, name: item.name, href: item.url,
+          thumb: (i === 0 && thumbValid)
+            ? '<img src="' + escapeHtml(existingThumbs[groupName]) + '" alt="" onerror="this.style.display=\'none\'">'
+            : ''
+        };
+      }));
+  }
+
+  // 방금 고른 (아직 저장 전) 파일 카드 - 미리보기는 브라우저에서 바로 만들어 보여줌
+  function renderNewFiles(groupName) {
+    var group = EXISTING_GROUPS[groupName];
+    if (!group) return;
+    var box = document.getElementById(group.newBoxId);
+    var files = multiFileStores[groupName] || [];
+
+    renderCardGrid(box, '새로 추가한 ' + group.label,
+      files.map(function (f) {
+        return { kind: 'new', group: groupName, name: f.name, href: '', thumb: '' };
+      }));
+
+    // 썸네일은 만드는 데 시간이 걸리니, 카드를 먼저 띄우고 준비되는 대로 하나씩 채워넣음
+    files.forEach(function (f, i) {
+      makeLocalThumbnail(f).then(function (src) {
+        if (!src || !box) return;
+        var slot = box.querySelector('[data-thumb-slot="new-' + groupName + '-' + i + '"]');
+        if (slot) slot.innerHTML = '<img src="' + src + '" alt="">';
+      });
+    });
+  }
+
+  // 내 컴퓨터에 있는 파일로 미리보기 이미지 만들기 (이미지는 그대로, PDF는 첫 페이지)
+  function makeLocalThumbnail(file) {
+    if (file.type && file.type.indexOf('image/') === 0) {
+      return Promise.resolve(URL.createObjectURL(file));
+    }
+    if (file.type === 'application/pdf') {
+      return makePortfolioThumbnail(file).then(function (blob) {
+        return blob ? URL.createObjectURL(blob) : '';
+      }).catch(function () { return ''; });
+    }
+    return Promise.resolve('');
+  }
+
+  function refreshFileCards(groupName) {
+    renderExistingFiles(groupName);
+    renderNewFiles(groupName);
+  }
+
+  // 불러온 데이터를 화면 상태로 옮겨담기
+  // names에 원래 파일 이름이 저장돼 있으면 그걸 쓰고, 없으면(예전 데이터) 주소에서 뽑아냄
+  function loadExistingFiles(groupName, urls, names, thumbUrl) {
+    var list = (urls || []).filter(Boolean).map(function (url, i) {
+      return { url: url, name: (names && names[i]) ? names[i] : getFileNameFromUrl(url) };
+    });
+    existingFiles[groupName] = list;
+    existingOriginal[groupName] = list.slice();
+    existingThumbs[groupName] = thumbUrl || '';
+    renderExistingFiles(groupName);
+  }
+
+  function clearAllExistingFiles() {
+    Object.keys(EXISTING_GROUPS).forEach(function (g) {
+      existingFiles[g] = [];
+      existingOriginal[g] = [];
+      existingThumbs[g] = '';
+      multiFileStores[g] = [];
+      refreshFileCards(g);
+    });
+  }
+
+  // x 버튼 클릭 처리 (카드는 그때그때 새로 그려지니까, 문서 전체에 한 번만 걸어둠)
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('.ncf-existing-remove') : null;
+    if (!btn) return;
+    e.preventDefault();
+    var g = btn.dataset.group;
+    var idx = parseInt(btn.dataset.index, 10);
+    if (isNaN(idx)) return;
+
+    if (btn.dataset.kind === 'new') {
+      if (!multiFileStores[g]) return;
+      multiFileStores[g].splice(idx, 1);
+      renderNewFiles(g);
+    } else {
+      if (!existingFiles[g]) return;
+      existingFiles[g].splice(idx, 1);
+      renderExistingFiles(g);
+      showToast('삭제되었습니다.');
+    }
+  });
 
   // ============================================
   // 3. 화면 상호작용 (글자수 카운터, 파일명 표시)
@@ -1061,77 +1266,36 @@
     e.target.classList.remove('is-invalid');
   });
 
-  // 이력서는 1개만 고르는 파일이라 새로 고르면 교체되는 게 맞음 - 기존 방식 유지
-  // 다만 잘못 고른 파일을 취소하고 싶을 수 있어서, 선택 후엔 삭제 버튼을 보여줌
-  var resumeInput = document.querySelector('input[name="resume"]');
-  (function () {
-    var filebox = resumeInput.closest('.ncf-filebox');
-    var label = filebox.querySelector('span:not(.badge)');
-    filebox.dataset.defaultLabel = label.textContent;
+  // 파일 3종 모두 같은 방식으로 다룸: 고른 파일은 박스 안 글자가 아니라 아래쪽 카드로 보여줌
+  // (박스 문구는 항상 "클릭하여 ~ 업로드"로 두어서, 다음에 뭘 해야 하는지가 항상 명확하게)
+  var multiFileStores = { resume: [], portfolio_file: [], mentor_portfolio: [] };
 
-    var resetLink = document.createElement('span');
-    resetLink.textContent = '삭제';
-    resetLink.className = 'ncf-filebox-reset';
-    resetLink.dataset.resumeReset = 'true';
-    resetLink.style.display = 'none';
-    resetLink.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      resumeInput.value = '';
-      label.textContent = filebox.dataset.defaultLabel;
-      resetLink.style.display = 'none';
-    });
-    filebox.appendChild(resetLink);
-
-    resumeInput.addEventListener('change', function () {
-      if (resumeInput.files.length === 0) return;
-      label.textContent = resumeInput.files[0].name;
-      resetLink.style.display = '';
-    });
-  })();
-
-  // 포트폴리오/발표용 포트폴리오는 여러 개를 나눠서 올릴 수 있어야 하는데,
-  // <input type="file" multiple>은 다시 고르면 이전 선택을 통째로 지워버림.
-  // 그래서 선택할 때마다 우리가 직접 관리하는 목록에 "추가"해주는 방식으로 바꿈.
-  var multiFileStores = {}; // { 필드명: [File, File, ...] }
-
-  function setupMultiFileInput(input) {
+  function setupFileInput(input, maxCount) {
     var name = input.name;
-    multiFileStores[name] = [];
-    var filebox = input.closest('.ncf-filebox');
-    var label = filebox.querySelector('span:not(.badge)');
-    var defaultLabel = label.textContent;
-
-    function renderLabel() {
-      var files = multiFileStores[name];
-      if (files.length === 0) {
-        label.textContent = defaultLabel;
-      } else {
-        label.textContent = files.map(function (f) { return f.name; }).join(', ') + ' · ' + files.length + '개 선택됨 (클릭하여 추가)';
-      }
-    }
-
     input.addEventListener('change', function () {
       if (input.files.length === 0) return;
-      Array.from(input.files).forEach(function (f) { multiFileStores[name].push(f); });
-      input.value = ''; // 값을 비워둬야 같은 파일을 또 선택해도 change 이벤트가 다시 일어남
-      renderLabel();
-    });
+      // 이미 등록된 파일도 그대로 유지되므로, 기존 + 새 파일을 합쳐서 개수를 셈
+      var keptCount = existingFiles[name].length;
+      var skipped = 0;
+      Array.from(input.files).forEach(function (f) {
+        if (keptCount + multiFileStores[name].length >= maxCount) { skipped++; return; }
+        multiFileStores[name].push(f);
+      });
+      input.value = ''; // 값을 비워둬야 같은 파일을 또 골라도 change 이벤트가 다시 일어남
+      refreshFileCards(name);
 
-    // 파일박스 오른쪽에 작은 "다시 선택" 링크를 붙여서 전체 초기화 가능하게 함
-    var resetLink = document.createElement('span');
-    resetLink.textContent = '전체 지우기';
-    resetLink.className = 'ncf-filebox-reset';
-    resetLink.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      multiFileStores[name] = [];
-      renderLabel();
+      if (skipped > 0) {
+        var groupLabel = EXISTING_GROUPS[name].label;
+        showToast(keptCount > 0
+          ? groupLabel + '는 최대 ' + maxCount + '개까지예요. 등록된 파일을 x 로 먼저 지워주세요.'
+          : groupLabel + '는 최대 ' + maxCount + '개까지라 ' + skipped + '개는 제외했어요.');
+      }
     });
-    filebox.appendChild(resetLink);
   }
 
-  document.querySelectorAll('input[name="portfolio_file"], input[name="mentor_portfolio"]').forEach(setupMultiFileInput);
+  setupFileInput(document.querySelector('input[name="resume"]'), 1);
+  setupFileInput(document.querySelector('input[name="portfolio_file"]'), 3);
+  setupFileInput(document.querySelector('input[name="mentor_portfolio"]'), 3);
 
   // ============================================
   // 4. 수정 모드 상태값
@@ -1266,6 +1430,11 @@
       form.querySelector('textarea[name="reason_mentor"]').value = data.reasonMentor || '';
       form.querySelector('textarea[name="reason_apply"]').value = data.reasonApply || '';
 
+      // 이미 올려둔 파일들을 썸네일 카드로 보여줌 (× 버튼으로 개별 삭제 가능)
+      loadExistingFiles('resume', data.resumeUrl ? [data.resumeUrl] : [], data.resumeName ? [data.resumeName] : null, data.resumeThumbnailUrl);
+      loadExistingFiles('portfolio_file', data.portfolioUrls, data.portfolioNames, data.portfolioThumbnailUrl);
+      loadExistingFiles('mentor_portfolio', data.mentorPortfolioUrls, data.mentorPortfolioNames, data.mentorPortfolioThumbnailUrl);
+
       bindCharCounters(); // 글자수 카운터 숫자 갱신
 
       // 5-3. 버튼 문구를 "수정하기" 모드로 변경
@@ -1348,11 +1517,7 @@
     upwEditHint.style.display = 'none';
     submitBtn.textContent = '신청하기';
     bindCharCounters();
-    document.querySelectorAll('.ncf-filebox span:not(.badge)').forEach(function (span) {
-      span.textContent = span.closest('.ncf-filebox').dataset.defaultLabel || span.textContent;
-    });
-    var resumeResetBtn = document.querySelector('[data-resume-reset]');
-    if (resumeResetBtn) resumeResetBtn.style.display = 'none';
+    clearAllExistingFiles();
     document.getElementById('ncfStep1').style.display = '';
     document.getElementById('ncfStep2').style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1393,10 +1558,11 @@
     var detailVal = form.querySelector('input[name="detail"]').value.trim();
     if (!detailVal) { focusInvalid(form.querySelector('input[name="detail"]'), '분야 상세는 필수 입력 사항입니다.'); return false; }
 
-    var resumeFile = form.querySelector('input[name="resume"]').files[0];
+    var resumeFile = multiFileStores['resume'][0];
     var portfolioFiles = multiFileStores['portfolio_file'];
-    if (!editingDocId && !resumeFile) { showToast('이력서 파일을 업로드해주세요.'); return false; }
-    if (!editingDocId && portfolioFiles.length === 0) { showToast('포트폴리오 파일을 1개 이상 업로드해주세요.'); return false; }
+    // 새로 올린 파일도 없고, 기존에 등록된 파일도 (× 로 지워서) 없으면 막음
+    if (!resumeFile && existingFiles.resume.length === 0) { showToast('이력서 파일을 업로드해주세요.'); return false; }
+    if (portfolioFiles.length === 0 && existingFiles.portfolio_file.length === 0) { showToast('포트폴리오 파일을 1개 이상 업로드해주세요.'); return false; }
 
     var fileLimitError = checkFileLimits(resumeFile, portfolioFiles, multiFileStores['mentor_portfolio']);
     if (fileLimitError) { showToast(fileLimitError); return false; }
@@ -1439,7 +1605,7 @@
 
     // 6-3. 나머지 값들 모으기
     var gender = form.querySelector('input[name="gender"]:checked');
-    var resumeFile = form.querySelector('input[name="resume"]').files[0];
+    var resumeFile = multiFileStores['resume'][0];
     var portfolioFiles = multiFileStores['portfolio_file'];
     var mentor = form.querySelector('input[name="mentor"]:checked');
     var mentorPortfolioFiles = multiFileStores['mentor_portfolio'];
@@ -1504,7 +1670,18 @@
       if (resumeFile) {
         uploadSteps.push({ label: '이력서', run: function (onProgress) {
           var fname = name + '_이력서' + getFileExt(resumeFile.name);
-          return uploadFile(resumeFile, 'resumes', fname, onProgress).then(function (url) { payload.resumeUrl = url; });
+          return uploadFile(resumeFile, 'resumes', fname, onProgress).then(function (url) {
+            payload.resumeUrl = url;
+            payload.resumeName = resumeFile.name;   // 원래 파일 이름 (수정 화면에서 예쁘게 보여주려고)
+            // 첫 페이지를 미리보기 이미지로 만들어 같이 저장 (수정할 때 썸네일로 보여주려고)
+            // 썸네일은 부가 기능이라, 실패해도 신청 자체는 계속 진행되게 catch로 감싸둠
+            return makePortfolioThumbnail(resumeFile).then(function (thumbBlob) {
+              if (!thumbBlob) return;
+              var thumbFile = new File([thumbBlob], 'thumb.jpg', { type: 'image/jpeg' });
+              return uploadFile(thumbFile, 'portfolio_thumbs', name + '_이력서썸네일.jpg', null)
+                .then(function (thumbUrl) { payload.resumeThumbnailUrl = thumbUrl; });
+            }).catch(function (err) { console.warn('이력서 썸네일 생략:', err); });
+          });
         }});
       }
       if (portfolioFiles.length > 0) {
@@ -1516,14 +1693,24 @@
             jobs.push(uploadFile(portfolioFiles[i], 'portfolios', pFname, i === 0 ? onProgress : null));
           }
           return Promise.all(jobs).then(function (urls) {
-            payload.portfolioUrls = urls;
-            // 첫 번째 포트폴리오의 1페이지를 썸네일 이미지로 만들어서 같이 저장 (실패해도 무시하고 진행)
+            // 화면에 남겨둔 기존 파일 뒤에 새 파일을 이어붙임 (기존 파일이 사라지지 않도록)
+            var kept = existingFiles.portfolio_file;
+            payload.portfolioUrls = kept.map(function (f) { return f.url; }).concat(urls);
+            payload.portfolioNames = kept.map(function (f) { return f.name; })
+                                         .concat(portfolioFiles.map(function (f) { return f.name; }));
+
+            if (kept.length > 0) {
+              // 맨 앞 파일이 그대로면 기존 썸네일 유지, 바뀌었으면 썸네일 없음 처리
+              if (kept[0].url !== (existingOriginal.portfolio_file[0] || {}).url) payload.portfolioThumbnailUrl = '';
+              return;
+            }
+            // 새 파일이 맨 앞이 되는 경우에만 썸네일을 새로 만듦 (실패해도 무시하고 진행)
             return makePortfolioThumbnail(portfolioFiles[0]).then(function (thumbBlob) {
               if (!thumbBlob) return;
               var thumbFile = new File([thumbBlob], 'thumb.jpg', { type: 'image/jpeg' });
               return uploadFile(thumbFile, 'portfolio_thumbs', name + '_썸네일.jpg', null)
                 .then(function (thumbUrl) { payload.portfolioThumbnailUrl = thumbUrl; });
-            });
+            }).catch(function (err) { console.warn('포트폴리오 썸네일 생략:', err); });
           });
         }});
       }
@@ -1535,7 +1722,23 @@
             var mFname = name + '_발표자료' + mSuffix + getFileExt(mentorPortfolioFiles[j].name);
             jobs.push(uploadFile(mentorPortfolioFiles[j], 'mentor_portfolios', mFname, j === 0 ? onProgress : null));
           }
-          return Promise.all(jobs).then(function (urls) { payload.mentorPortfolioUrls = urls; });
+          return Promise.all(jobs).then(function (urls) {
+            var keptM = existingFiles.mentor_portfolio;
+            payload.mentorPortfolioUrls = keptM.map(function (f) { return f.url; }).concat(urls);
+            payload.mentorPortfolioNames = keptM.map(function (f) { return f.name; })
+                                                .concat(mentorPortfolioFiles.map(function (f) { return f.name; }));
+
+            if (keptM.length > 0) {
+              if (keptM[0].url !== (existingOriginal.mentor_portfolio[0] || {}).url) payload.mentorPortfolioThumbnailUrl = '';
+              return;
+            }
+            return makePortfolioThumbnail(mentorPortfolioFiles[0]).then(function (thumbBlob) {
+              if (!thumbBlob) return;
+              var thumbFile = new File([thumbBlob], 'thumb.jpg', { type: 'image/jpeg' });
+              return uploadFile(thumbFile, 'portfolio_thumbs', name + '_발표자료썸네일.jpg', null)
+                .then(function (thumbUrl) { payload.mentorPortfolioThumbnailUrl = thumbUrl; });
+            }).catch(function (err) { console.warn('발표자료 썸네일 생략:', err); });
+          });
         }});
       }
 
@@ -1546,6 +1749,33 @@
         await uploadSteps[s].run(function (percent) {
           setProgress(prefix + stepLabel + '를 올리고 있어요 (' + percent + '%)');
         });
+      }
+
+      // 새로 올린 파일이 없는 항목은, 화면에 남겨둔 기존 파일 목록을 그대로 저장함
+      // (× 로 지운 파일이 실제로 반영되도록. 아무것도 안 건드렸으면 원래대로 다시 저장되는 것뿐이라 안전함)
+      if (editingDocId) {
+        if (!resumeFile) {
+          var keptResume = existingFiles.resume;
+          payload.resumeUrl = keptResume.length ? keptResume[0].url : '';
+          payload.resumeName = keptResume.length ? keptResume[0].name : '';
+          if (!keptResume.length) payload.resumeThumbnailUrl = '';
+        }
+        if (portfolioFiles.length === 0) {
+          payload.portfolioUrls = existingFiles.portfolio_file.map(function (f) { return f.url; });
+          payload.portfolioNames = existingFiles.portfolio_file.map(function (f) { return f.name; });
+          if (!existingFiles.portfolio_file.length ||
+              existingFiles.portfolio_file[0].url !== (existingOriginal.portfolio_file[0] || {}).url) {
+            payload.portfolioThumbnailUrl = '';
+          }
+        }
+        if (mentorPortfolioFiles.length === 0) {
+          payload.mentorPortfolioUrls = existingFiles.mentor_portfolio.map(function (f) { return f.url; });
+          payload.mentorPortfolioNames = existingFiles.mentor_portfolio.map(function (f) { return f.name; });
+          if (!existingFiles.mentor_portfolio.length ||
+              existingFiles.mentor_portfolio[0].url !== (existingOriginal.mentor_portfolio[0] || {}).url) {
+            payload.mentorPortfolioThumbnailUrl = '';
+          }
+        }
       }
 
       setProgress(editingDocId ? '수정 내용을 저장하고 있어요' : '거의 다 됐어요, 저장하고 있어요');
