@@ -615,13 +615,7 @@
       <h2 class="ncf-group-title"><span class="ncf-group-title-text"><span class="ncf-step-num">2</span>넥스트 커리어 페어 2026 멘토링 신청하기 <span class="ncf-group-optional">(선택)</span></span></h2>
     </div>
 
-    <!-- 멘토링 신청 마감 안내 (마감 시각이 지나면 JS가 이걸 보여주고, 아래 신청 항목은 숨겨요) -->
-    <div id="ncfMentoringClosedNotice" class="ncf-notice" style="display:none;">
-      <p style="margin:0;font-weight:600;">멘토링 신청이 마감되었어요.</p>
-      <p style="margin:6px 0 0;">신청 기간이 종료되어 더 이상 멘토링 신청을 받지 않고 있어요. 궁금하신 점은 아래 문의처로 연락해주세요.</p>
-    </div>
-
-    <div class="ncf-sec" id="ncfMentoringFields">
+    <div class="ncf-sec">
       <div class="ncf-field">
         <label>희망하는 멘토 한 명을 선택해주세요 <span class="ncf-group-optional">(한 명만 선택 가능)</span></label>
         <!-- 멘토 사진은 base64로 인코딩해서 이미지 파일 그대로 코드 안에 넣어뒀어요 (따로 파일 업로드/링크 관리 필요 없음).
@@ -1148,39 +1142,6 @@
   var upwEditHint = document.getElementById('upwEditHint');
 
   var editingDocId = null;      // 지금 수정 중인 문서 ID (null이면 새 신청)
-
-  // ============================================
-  // 4-1. 멘토링 신청 마감 처리
-  // 2026-08-20(목) 0시(한국 시간)부터 멘토링 신청 항목을 자동으로 닫아요.
-  // '+09:00'을 명시해서, 방문자의 기기가 어느 시간대에 있든 한국 시간 기준으로 정확히 마감돼요.
-  // ============================================
-  var MENTORING_DEADLINE = new Date('2026-08-20T00:00:00+09:00');
-
-  function isMentoringClosed() {
-    return new Date() >= MENTORING_DEADLINE;
-  }
-
-  // 새 신청은 마감 시 막되, 이미 신청서를 낸 사람이 자기 신청 내용을 "수정"하는 경우는
-  // (마감 전에 이미 접수된 신청이므로) 계속 확인/수정할 수 있게 열어둠
-  function applyMentoringDeadlineUI() {
-    var closed = isMentoringClosed() && !editingDocId;
-    var fieldsEl = document.getElementById('ncfMentoringFields');
-    var noticeEl = document.getElementById('ncfMentoringClosedNotice');
-    if (!fieldsEl || !noticeEl) return;
-
-    if (closed) {
-      fieldsEl.style.display = 'none';
-      noticeEl.style.display = '';
-      // 혹시 선택해둔 값이 있었다면 제출에 딸려가지 않도록 초기화
-      form.querySelectorAll('input[name="mentor"]').forEach(function (r) { r.checked = false; });
-      multiFileStores['mentor_portfolio'] = [];
-    } else {
-      fieldsEl.style.display = '';
-      noticeEl.style.display = 'none';
-    }
-  }
-
-  applyMentoringDeadlineUI(); // 페이지 로드 시 바로 한 번 적용
   var editingOldHashedPw = '';  // 비밀번호를 안 바꿨을 때 그대로 재사용할 기존 암호화값
 
   // 업로드 중 전체화면 오버레이 제어
@@ -1312,7 +1273,6 @@
       // 수정할 땐 1번/2번 다 한 번에 보여줌 (다음 버튼 누를 필요 없이 전체를 바로 확인/수정할 수 있게)
       document.getElementById('ncfStep1').style.display = '';
       document.getElementById('ncfStep2').style.display = '';
-      applyMentoringDeadlineUI(); // 수정 모드이므로 마감 후에도 멘토링 항목이 계속 열려있어야 함
 
       showToast('신청 내용을 불러왔어요! 원하시는 부분을 고치신 후 맨 아래 버튼을 눌러주세요.', 'success');
       document.querySelector('.ncf-sec').scrollIntoView({ behavior: 'smooth' });
@@ -1447,7 +1407,6 @@
   // '다음' 버튼: 1번 필수 항목이 다 채워졌으면 2번(멘토링, 선택)을 보여줌
   document.getElementById('ncfNextBtn').addEventListener('click', function () {
     if (!validateStep1()) return;
-    applyMentoringDeadlineUI();
     document.getElementById('ncfStep1').style.display = 'none';
     document.getElementById('ncfStep2').style.display = '';
     // 페이지 맨 위(로그인 박스)로 스크롤하면 "다시 로그인 화면으로 돌아간 건가?" 헷갈릴 수 있어서,
@@ -1615,4 +1574,3 @@
     }
   });
 </script>
-
